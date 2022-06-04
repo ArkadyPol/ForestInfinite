@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import './index.css'
 
 const canvas = document.querySelector('#c')
 const renderer = new THREE.WebGLRenderer({ canvas })
@@ -23,7 +24,7 @@ const cubes = [
 ]
 
 //light
-const color = '0xffffff'
+const color = 0xffffff
 const intensity = 1
 const light = new THREE.DirectionalLight(color, intensity)
 light.position.set(-1, 2, 4)
@@ -31,6 +32,12 @@ scene.add(light)
 
 function render(time) {
   time *= 0.001
+
+  if (resizeRendererToDisplaySize(renderer)) {
+    const canvas = renderer.domElement
+    camera.aspect = canvas.clientWidth / canvas.clientHeight
+    camera.updateProjectionMatrix()
+  }
 
   cubes.forEach((cube, ndx) => {
     const speed = 1 + ndx * 0.1
@@ -46,6 +53,13 @@ function render(time) {
 
 requestAnimationFrame(render)
 
+/**
+ *
+ * @param {THREE.BoxGeometry} geometry
+ * @param {THREE.ColorRepresentation} color
+ * @param {number} x
+ * @returns
+ */
 function makeInstance(geometry, color, x) {
   const material = new THREE.MeshPhongMaterial({ color })
 
@@ -55,4 +69,20 @@ function makeInstance(geometry, color, x) {
   cube.position.x = x
 
   return cube
+}
+
+/**
+ *
+ * @param {THREE.WebGLRenderer} renderer
+ * @returns {boolean}
+ */
+function resizeRendererToDisplaySize(renderer) {
+  const canvas = renderer.domElement
+  const width = canvas.clientWidth
+  const height = canvas.clientHeight
+  const needResize = canvas.width !== width || canvas.height !== height
+  if (needResize) {
+    renderer.setSize(width, height, false)
+  }
+  return needResize
 }
