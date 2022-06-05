@@ -4,34 +4,84 @@ import './index.css'
 const canvas = document.querySelector('#c')
 const renderer = new THREE.WebGLRenderer({ canvas })
 
-const fov = 75
+const fov = 40
 const aspect = 2
 const near = 0.1
-const far = 5
+const far = 1000
 const camera = new THREE.PerspectiveCamera(fov, aspect, near, far)
-camera.position.z = 2
+camera.position.set(0, 50, 0)
+camera.up.set(0, 0, 1)
+camera.lookAt(0, 0, 0)
 
 const scene = new THREE.Scene()
 
-const boxWidth = 1
-const boxHeight = 1
-const boxDepth = 1
-const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth)
-const cubes = [
-  makeInstance(geometry, 0x44aa88, 0),
-  makeInstance(geometry, 0x8844aa, -2),
-  makeInstance(geometry, 0xaa8844, 2),
-]
+{
+  const color = 0xffffff
+  const intensity = 3
+  const light = new THREE.PointLight(color, intensity)
+  scene.add(light)
+}
 
-//light
-const color = 0xffffff
-const intensity = 1
-const light = new THREE.DirectionalLight(color, intensity)
-light.position.set(-1, 2, 4)
-scene.add(light)
+const objects = []
+
+const radius = 1
+const widthSegments = 6
+const heightSegments = 6
+const sphereGeometry = new THREE.SphereGeometry(
+  radius,
+  widthSegments,
+  heightSegments
+)
+
+const solarSystem = new THREE.Object3D()
+scene.add(solarSystem)
+objects.push(solarSystem)
+
+const sunMaterial = new THREE.MeshPhongMaterial({ emissive: 0xffff00 })
+const sunMesh = new THREE.Mesh(sphereGeometry, sunMaterial)
+sunMesh.scale.set(5, 5, 5)
+solarSystem.add(sunMesh)
+objects.push(sunMesh)
+
+const earthOrbit = new THREE.Object3D()
+earthOrbit.position.x = 10
+solarSystem.add(earthOrbit)
+objects.push(earthOrbit)
+
+const earthMaterial = new THREE.MeshPhongMaterial({
+  color: 0x2233ff,
+  emissive: 0x112244,
+})
+const earthMesh = new THREE.Mesh(sphereGeometry, earthMaterial)
+earthOrbit.add(earthMesh)
+objects.push(earthMesh)
+
+const moonOrbit = new THREE.Object3D()
+moonOrbit.position.x = 2
+earthOrbit.add(moonOrbit)
+
+const moonMaterial = new THREE.MeshPhongMaterial({
+  color: 0x888888,
+  emissive: 0x222222,
+})
+const moonMesh = new THREE.Mesh(sphereGeometry, moonMaterial)
+moonMesh.scale.set(0.5, 0.5, 0.5)
+moonOrbit.add(moonMesh)
+objects.push(moonMesh)
+
+objects.forEach(node => {
+  const axes = new THREE.AxesHelper()
+  axes.material.depthTest = false
+  axes.renderOrder = 1
+  node.add(axes)
+})
 
 function render(time) {
   time *= 0.001
+
+  objects.forEach(obj => {
+    obj.rotation.y = time
+  })
 
   if (resizeRendererToDisplaySize(renderer)) {
     const canvas = renderer.domElement
@@ -39,37 +89,12 @@ function render(time) {
     camera.updateProjectionMatrix()
   }
 
-  cubes.forEach((cube, ndx) => {
-    const speed = 1 + ndx * 0.1
-    const rot = time * speed
-    cube.rotation.x = rot
-    cube.rotation.y = rot
-  })
-
   renderer.render(scene, camera)
 
   requestAnimationFrame(render)
 }
 
 requestAnimationFrame(render)
-
-/**
- *
- * @param {THREE.BoxGeometry} geometry
- * @param {THREE.ColorRepresentation} color
- * @param {number} x
- * @returns
- */
-function makeInstance(geometry, color, x) {
-  const material = new THREE.MeshPhongMaterial({ color })
-
-  const cube = new THREE.Mesh(geometry, material)
-  scene.add(cube)
-
-  cube.position.x = x
-
-  return cube
-}
 
 /**
  *
