@@ -11,7 +11,7 @@ class Game {
   framesCount = 0
 
   start() {
-    this.camera.position.set(-9, 6, 0)
+    this.camera.position.set(-9, 7, 0)
     this.controls.update()
     this.addLight()
     this.loadHouse()
