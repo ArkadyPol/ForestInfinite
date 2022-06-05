@@ -1,23 +1,20 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 class Game {
   canvas = document.querySelector('#c')
   renderer = new THREE.WebGLRenderer({ canvas: this.canvas })
   scene = new THREE.Scene()
-  loader = new THREE.TextureLoader()
+  gltfLoader = new GLTFLoader()
   camera = new THREE.PerspectiveCamera(50, 2, 0.1, 100)
   controls = new OrbitControls(this.camera, this.canvas)
   framesCount = 0
 
   start() {
-    this.camera.position.set(0, 10, 20)
-    this.controls.target.set(0, 5, 0)
+    this.camera.position.set(-9, 6, 0)
     this.controls.update()
     this.addLight()
-    this.addPlane()
-    this.addCube()
-    this.addSphere()
+    this.loadHouse()
   }
 
   render(time) {
@@ -39,55 +36,22 @@ class Game {
   }
 
   addLight() {
-    const color = 0xffffff
-    const intensity = 1
-    this.light = new THREE.SpotLight(color, intensity)
-    this.light.position.set(0, 20, 0)
+    this.light = new THREE.DirectionalLight(0xffffff, 1)
+    this.light.position.set(0, 25, 10)
+    this.light.target.position.set(0, 0, -10)
+    this.light.castShadow = true
     this.scene.add(this.light)
     this.scene.add(this.light.target)
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.2)
+    this.scene.add(ambientLight)
   }
 
-  addPlane() {
-    const texture = this.loader.load('assets/images/checker.png')
-    texture.wrapS = THREE.RepeatWrapping
-    texture.wrapT = THREE.RepeatWrapping
-    texture.magFilter = THREE.NearestFilter
-    const planeSize = 40
-    const repeats = planeSize / 2
-    texture.repeat.set(repeats, repeats)
-
-    const planeGeo = new THREE.PlaneGeometry(planeSize, planeSize)
-    const planeMat = new THREE.MeshPhongMaterial({
-      map: texture,
-      side: THREE.DoubleSide,
+  loadHouse() {
+    const url = 'assets/models/house.gltf'
+    this.gltfLoader.load(url, gltf => {
+      const root = gltf.scene
+      this.scene.add(root)
     })
-    this.plane = new THREE.Mesh(planeGeo, planeMat)
-    this.plane.rotation.x = Math.PI * -0.5
-    this.scene.add(this.plane)
-  }
-
-  addCube() {
-    const cubeSize = 4
-    const cubeGeo = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize)
-    const cubeMat = new THREE.MeshPhongMaterial({ color: '#8AC' })
-    this.cube = new THREE.Mesh(cubeGeo, cubeMat)
-    this.cube.position.set(cubeSize + 1, cubeSize / 2, 0)
-    this.scene.add(this.cube)
-  }
-
-  addSphere() {
-    const sphereRadius = 3
-    const sphereWidthDivisions = 32
-    const sphereHeightDivisions = 16
-    const sphereGeo = new THREE.SphereGeometry(
-      sphereRadius,
-      sphereWidthDivisions,
-      sphereHeightDivisions
-    )
-    const sphereMat = new THREE.MeshPhongMaterial({ color: '#CA8' })
-    this.sphere = new THREE.Mesh(sphereGeo, sphereMat)
-    this.sphere.position.set(-sphereRadius - 1, sphereRadius + 2, 0)
-    this.scene.add(this.sphere)
   }
 }
 
