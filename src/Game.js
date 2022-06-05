@@ -1,6 +1,8 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
+THREE.Object3D.DefaultUp.set(0, 0, 1)
+
 class Game {
   canvas = document.querySelector('#c')
   renderer = new THREE.WebGLRenderer({ canvas: this.canvas })
@@ -11,7 +13,7 @@ class Game {
   framesCount = 0
 
   start() {
-    this.camera.position.set(-9, 7, 0)
+    this.camera.position.set(-9, 0, 7)
     this.controls.update()
     this.addLight()
     this.loadHouse()
@@ -37,9 +39,8 @@ class Game {
 
   addLight() {
     this.light = new THREE.DirectionalLight(0xffffff, 1)
-    this.light.position.set(0, 25, 10)
-    this.light.target.position.set(0, 0, -10)
-    this.light.castShadow = true
+    this.light.position.set(0, -10, 30)
+    this.light.target.position.set(0, 10, 0)
     this.scene.add(this.light)
     this.scene.add(this.light.target)
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.2)
