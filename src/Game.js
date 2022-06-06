@@ -13,7 +13,7 @@ class Game {
   framesCount = 0
 
   start() {
-    this.camera.position.set(-9, 0, 7)
+    this.camera.position.set(0, -10, 8)
     this.controls.update()
     this.addLight()
     this.loadHouse()
@@ -39,8 +39,8 @@ class Game {
 
   addLight() {
     this.light = new THREE.DirectionalLight(0xffffff, 1)
-    this.light.position.set(0, -10, 30)
-    this.light.target.position.set(0, 10, 0)
+    this.light.position.set(10, 0, 30)
+    this.light.target.position.set(-8, 0, 0)
     this.scene.add(this.light)
     this.scene.add(this.light.target)
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.2)
