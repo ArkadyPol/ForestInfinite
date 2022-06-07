@@ -15,11 +15,11 @@ class Game {
   framesCount = 0
   then = 0
   light!: THREE.DirectionalLight
-  plane: THREE.Mesh
+  plane!: THREE.Mesh
 
   constructor(models: ModelsType, animations: AnimationsType) {
     this.addLight()
-    this.plane = models.house.getObjectByName('Field') as THREE.Mesh
+    this.addPlane(50)
     this.scene.add(models.house)
     Arrow.meshSample = models.arrow.getObjectByName('Arrow') as THREE.Mesh
     Arrow.animationClip = animations.ArrowAction
@@ -74,6 +74,13 @@ class Game {
     this.scene.add(this.light.target)
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.2)
     this.scene.add(ambientLight)
+  }
+
+  addPlane(size: number) {
+    const planeGeo = new THREE.PlaneGeometry(size, size)
+    const planeMat = new THREE.MeshStandardMaterial({ color: 0x4e9632 })
+    this.plane = new THREE.Mesh(planeGeo, planeMat)
+    this.scene.add(this.plane)
   }
 
   onClick(e: MouseEvent) {
