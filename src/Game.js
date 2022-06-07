@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import Arrow from './Arrow'
+import Character from './Character'
 THREE.Object3D.DefaultUp.set(0, 0, 1)
 
 class Game {
@@ -22,6 +23,7 @@ class Game {
     this.controls.update()
     this.addLight()
     this.loadHouse()
+    this.createCharacter()
     this.loadArrow()
     this.canvas.addEventListener('click', this.onClick.bind(this))
   }
@@ -40,6 +42,8 @@ class Game {
         i--
       }
     }
+    this.character.update(deltaTime)
+
     this.resize()
 
     this.renderer.render(this.scene, this.camera)
@@ -97,6 +101,7 @@ class Game {
     if (intersects.length > 0) {
       const point = intersects[0].point
       this.createArrow(point)
+      this.character.startMove(point)
     }
   }
 
@@ -104,6 +109,10 @@ class Game {
     const arrow = new Arrow(this.arrow, this.animations['ArrowAction'], point)
     this.scene.add(arrow.mesh)
     this.arrows.push(arrow)
+  }
+
+  createCharacter() {
+    this.character = new Character(2, this.gltfLoader, this.scene)
   }
 }
 
