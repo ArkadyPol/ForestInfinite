@@ -1,39 +1,29 @@
 import * as THREE from 'three'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 
 class Character {
   animations = {} as { [key: string]: THREE.AnimationClip }
   inMove = false
   target = null as THREE.Vector3 | null
-  mesh = null as THREE.Mesh | null
-  mixer = null as THREE.AnimationMixer | null
-  walk = null as THREE.AnimationAction | null
   speed: number
+  mesh: THREE.Mesh
+  mixer: THREE.AnimationMixer
+  walk: THREE.AnimationAction
 
-  constructor(speed: number, gltfLoader: GLTFLoader, scene: THREE.Scene) {
+  constructor(
+    speed: number,
+    mesh: THREE.Mesh,
+    animationClip: THREE.AnimationClip
+  ) {
     this.speed = speed
-    this.load(gltfLoader, scene)
-  }
-
-  load(gltfLoader: GLTFLoader, scene: THREE.Scene) {
-    const url = 'assets/models/character.gltf'
-    gltfLoader.load(url, gltf => {
-      const root = gltf.scene
-      for (let clip of gltf.animations) {
-        this.animations[clip.name] = clip
-      }
-      this.mesh = root.getObjectByName('Character') as THREE.Mesh
-      this.mesh.position.setY(-3)
-      scene.add(this.mesh)
-      this.mixer = new THREE.AnimationMixer(this.mesh)
-      this.walk = this.mixer.clipAction(this.animations.Walk)
-    })
+    this.mesh = mesh
+    this.mesh.position.setY(-3)
+    this.mixer = new THREE.AnimationMixer(this.mesh)
+    this.walk = this.mixer.clipAction(animationClip)
+    Character.character = this
   }
 
   update(deltaTime: number) {
-    if (this.mixer) {
-      this.mixer.update(deltaTime)
-    }
+    this.mixer.update(deltaTime)
     if (this.inMove) {
       this.moveTo(deltaTime)
     }
@@ -44,13 +34,9 @@ class Character {
     const vector2D = this.calculateVector()
     if (!vector2D) return
     const angle = Math.atan2(vector2D.y, vector2D.x) + Math.PI / 2
-    if (this.mesh) {
-      this.mesh.rotation.z = angle
-    }
+    this.mesh.rotation.z = angle
     this.inMove = true
-    if (this.walk) {
-      this.walk.play()
-    }
+    this.walk.play()
   }
 
   endMove() {
@@ -63,7 +49,7 @@ class Character {
 
   moveTo(deltaTime: number) {
     const vector2D = this.calculateVector()
-    if (!vector2D || !this.target || !this.mesh) return
+    if (!vector2D || !this.target) return
     const distance = Math.sqrt(
       vector2D.x * vector2D.x + vector2D.y * vector2D.y
     )
@@ -86,12 +72,14 @@ class Character {
   }
 
   calculateVector() {
-    if (!this.target || !this.mesh) return
+    if (!this.target) return
     return {
       x: this.target.x - this.mesh.position.x,
       y: this.target.y - this.mesh.position.y,
     }
   }
+
+  static character: Character
 }
 
 export default Character
