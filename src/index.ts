@@ -4,9 +4,9 @@ import './index.css'
 const game = new Game()
 game.start()
 
-function animate(time) {
+function animate(time: number) {
   game.render(time)
   requestAnimationFrame(animate)
 }
 
-animate()
+requestAnimationFrame(animate)

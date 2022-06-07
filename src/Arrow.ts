@@ -1,16 +1,24 @@
-import { AnimationMixer } from 'three'
+import * as THREE from 'three'
 
 class Arrow {
   shouldDeleted = false
-  constructor(mesh, animationClip, point) {
+  mesh: THREE.Mesh
+  mixer: THREE.AnimationMixer
+  action: THREE.AnimationAction
+
+  constructor(
+    mesh: THREE.Mesh,
+    animationClip: THREE.AnimationClip,
+    point: THREE.Vector3
+  ) {
     this.mesh = mesh.clone()
     this.mesh.position.set(point.x, point.y, point.z)
-    this.mixer = new AnimationMixer(this.mesh)
+    this.mixer = new THREE.AnimationMixer(this.mesh)
     this.action = this.mixer.clipAction(animationClip)
     this.action.play()
   }
 
-  update(deltaTime) {
+  update(deltaTime: number) {
     if (this.mixer.time > 0.5) {
       this.shouldDeleted = true
     }
@@ -19,7 +27,7 @@ class Arrow {
 
   delete() {
     this.mesh.geometry.dispose()
-    this.mesh.material.dispose()
+    ;(<THREE.Material>this.mesh.material).dispose()
   }
 }
 

@@ -6,7 +6,7 @@ import Character from './Character'
 THREE.Object3D.DefaultUp.set(0, 0, 1)
 
 class Game {
-  canvas = document.querySelector('#c')
+  canvas = document.querySelector('#c') as HTMLCanvasElement
   renderer = new THREE.WebGLRenderer({ canvas: this.canvas })
   scene = new THREE.Scene()
   gltfLoader = new GLTFLoader()
@@ -15,8 +15,12 @@ class Game {
   raycaster = new THREE.Raycaster()
   framesCount = 0
   then = 0
-  arrows = []
-  animations = {}
+  arrows = [] as Arrow[]
+  animations = {} as { [key: string]: THREE.AnimationClip }
+  light = null as THREE.DirectionalLight | null
+  plane = null as THREE.Mesh | null
+  character = null as Character | null
+  arrow = null as THREE.Mesh | null
 
   start() {
     this.camera.position.set(0, -10, 8)
@@ -28,7 +32,7 @@ class Game {
     this.canvas.addEventListener('click', this.onClick.bind(this))
   }
 
-  render(time) {
+  render(time: number) {
     const now = time * 0.001
     const deltaTime = now - this.then
     this.then = now
@@ -42,7 +46,9 @@ class Game {
         i--
       }
     }
-    this.character.update(deltaTime)
+    if (this.character) {
+      this.character.update(deltaTime)
+    }
 
     this.resize()
 
@@ -76,7 +82,7 @@ class Game {
     const url = 'assets/models/house.gltf'
     this.gltfLoader.load(url, gltf => {
       const root = gltf.scene
-      this.plane = root.getObjectByName('Field')
+      this.plane = root.getObjectByName('Field') as THREE.Mesh
       this.scene.add(root)
     })
   }
@@ -88,24 +94,28 @@ class Game {
       for (let clip of gltf.animations) {
         this.animations[clip.name] = clip
       }
-      this.arrow = root.getObjectByName('Arrow')
+      this.arrow = root.getObjectByName('Arrow') as THREE.Mesh
     })
   }
 
-  onClick(e) {
+  onClick(e: MouseEvent) {
     const pointer = new THREE.Vector2()
     pointer.x = (e.clientX / this.canvas.width) * 2 - 1
     pointer.y = -(e.clientY / this.canvas.height) * 2 + 1
     this.raycaster.setFromCamera(pointer, this.camera)
+    if (!this.plane) return
     const intersects = this.raycaster.intersectObjects([this.plane])
     if (intersects.length > 0) {
       const point = intersects[0].point
       this.createArrow(point)
-      this.character.startMove(point)
+      if (this.character) {
+        this.character.startMove(point)
+      }
     }
   }
 
-  createArrow(point) {
+  createArrow(point: THREE.Vector3) {
+    if (!this.arrow) return
     const arrow = new Arrow(this.arrow, this.animations['ArrowAction'], point)
     this.scene.add(arrow.mesh)
     this.arrows.push(arrow)
