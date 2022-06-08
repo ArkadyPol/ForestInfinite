@@ -6,6 +6,8 @@ const urls = {
   house: 'assets/models/house.gltf',
   arrow: 'assets/models/arrow.gltf',
   character: 'assets/models/character.gltf',
+  tree: 'assets/models/tree.gltf',
+  grass: 'assets/models/grass.gltf',
 }
 
 const { models, animations, manager } = loadAssets(urls)

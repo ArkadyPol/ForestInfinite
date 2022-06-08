@@ -19,6 +19,8 @@ class Game {
   constructor(models: ModelsType, animations: AnimationsType) {
     this.addLight()
     Sector.size = 40
+    Sector.tree = models.tree.getObjectByName('Tree') as THREE.Group
+    Sector.grass = models.grass.getObjectByName('Grass') as THREE.Mesh
     const sector = new Sector(0, 0, this.scene)
     sector.sector.add(models.house)
     new Sector(0, 1, this.scene)
@@ -27,7 +29,7 @@ class Game {
     Arrow.animationClip = animations.ArrowAction
     const character = new Character(
       2,
-      models.character.getObjectByName('Character') as THREE.Mesh,
+      models.character.getObjectByName('Character') as THREE.Object3D,
       animations.Walk
     )
     this.scene.add(character.container)

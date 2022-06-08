@@ -6,18 +6,18 @@ class Character {
   inMove = false
   target = null as THREE.Vector3 | null
   speed: number
-  container: THREE.Object3D
-  mesh: THREE.Mesh
+  container: THREE.Group
+  mesh: THREE.Object3D
   mixer: THREE.AnimationMixer
   walk: THREE.AnimationAction
 
   constructor(
     speed: number,
-    mesh: THREE.Mesh,
+    mesh: THREE.Object3D,
     animationClip: THREE.AnimationClip
   ) {
     this.speed = speed
-    this.container = new THREE.Object3D()
+    this.container = new THREE.Group()
     this.mesh = mesh
     this.container.add(this.camera)
     this.container.add(this.mesh)
