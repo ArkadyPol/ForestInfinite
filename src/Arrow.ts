@@ -33,13 +33,11 @@ class Arrow {
 
   static arrows = [] as Arrow[]
 
-  static scene: THREE.Scene
-
   static delete(id: number) {
     this.arrows = this.arrows.filter(arrow => {
       if (arrow.mesh.id === id) {
         arrow.delete()
-        this.scene.remove(arrow.mesh)
+        arrow.mesh.parent?.remove(arrow.mesh)
         return false
       }
       return true

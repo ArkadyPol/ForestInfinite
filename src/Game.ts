@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import Arrow from './Arrow'
 import CameraControls from './CameraControls'
 import Character from './Character'
+import Sector from './Sector'
 import { AnimationsType, ModelsType } from './utils/loadAssets'
 THREE.Object3D.DefaultUp.set(0, 0, 1)
 
@@ -14,15 +15,16 @@ class Game {
   then = 0
   controls = new CameraControls(this.canvas)
   light!: THREE.DirectionalLight
-  plane!: THREE.Mesh
 
   constructor(models: ModelsType, animations: AnimationsType) {
     this.addLight()
-    this.addPlane(50)
-    this.scene.add(models.house)
+    Sector.size = 40
+    const sector = new Sector(0, 0, this.scene)
+    sector.sector.add(models.house)
+    new Sector(0, 1, this.scene)
+    new Sector(1, 0, this.scene)
     Arrow.meshSample = models.arrow.getObjectByName('Arrow') as THREE.Mesh
     Arrow.animationClip = animations.ArrowAction
-    Arrow.scene = this.scene
     const character = new Character(
       2,
       models.character.getObjectByName('Character') as THREE.Mesh,
@@ -70,19 +72,12 @@ class Game {
     this.scene.add(ambientLight)
   }
 
-  addPlane(size: number) {
-    const planeGeo = new THREE.PlaneGeometry(size, size)
-    const planeMat = new THREE.MeshStandardMaterial({ color: 0x4e9632 })
-    this.plane = new THREE.Mesh(planeGeo, planeMat)
-    this.scene.add(this.plane)
-  }
-
   onClick(e: MouseEvent) {
     const pointer = new THREE.Vector2()
     pointer.x = (e.clientX / this.canvas.width) * 2 - 1
     pointer.y = -(e.clientY / this.canvas.height) * 2 + 1
     this.raycaster.setFromCamera(pointer, Character.character.camera)
-    const intersects = this.raycaster.intersectObjects([this.plane])
+    const intersects = this.raycaster.intersectObjects(Sector.planes)
     if (intersects.length > 0) {
       const point = intersects[0].point
       this.createArrow(point)
