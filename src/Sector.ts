@@ -71,6 +71,16 @@ class Sector {
   static get planes() {
     return this.sectors.map(s => s.plane)
   }
+
+  static isExist(x: number, y: number) {
+    const index = this.sectors.findIndex(s => s.x === x && s.y === y)
+    return index !== -1
+  }
+
+  static create(x: number, y: number, scene: THREE.Scene) {
+    if (this.isExist(x, y)) return
+    return new this(x, y, scene)
+  }
 }
 
 export default Sector

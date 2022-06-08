@@ -16,15 +16,13 @@ class Game {
   controls = new CameraControls(this.canvas)
   light!: THREE.DirectionalLight
 
-  constructor(models: ModelsType, animations: AnimationsType) {
+  constructor(models: ModelsType, animations: AnimationsType, sectorSize = 40) {
     this.addLight()
-    Sector.size = 40
+    Sector.size = sectorSize
     Sector.tree = models.tree.getObjectByName('Tree') as THREE.Group
     Sector.grass = models.grass.getObjectByName('Grass') as THREE.Mesh
     const sector = new Sector(0, 0, this.scene)
     sector.sector.add(models.house)
-    new Sector(0, 1, this.scene)
-    new Sector(1, 0, this.scene)
     Arrow.meshSample = models.arrow.getObjectByName('Arrow') as THREE.Mesh
     Arrow.animationClip = animations.ArrowAction
     const character = new Character(
@@ -81,7 +79,33 @@ class Game {
     this.raycaster.setFromCamera(pointer, Character.character.camera)
     const intersects = this.raycaster.intersectObjects(Sector.planes)
     if (intersects.length > 0) {
-      const point = intersects[0].point
+      const { point, object } = intersects[0]
+      const local = new THREE.Vector3().copy(point)
+      object.worldToLocal(local)
+      const sectorPos = new THREE.Vector3()
+        .copy(object.parent!.position)
+        .divideScalar(Sector.size)
+
+      const border = Sector.size * 0.4
+      const xDiff = Math.abs(local.x) - border
+      const yDiff = Math.abs(local.y) - border
+
+      if (xDiff >= 0) {
+        Sector.create(sectorPos.x + Math.sign(local.x), sectorPos.y, this.scene)
+      }
+
+      if (yDiff >= 0) {
+        Sector.create(sectorPos.x, sectorPos.y + Math.sign(local.y), this.scene)
+      }
+
+      if (xDiff >= 0 && yDiff >= 0) {
+        Sector.create(
+          sectorPos.x + Math.sign(local.x),
+          sectorPos.y + Math.sign(local.y),
+          this.scene
+        )
+      }
+
       this.createArrow(point)
       Character.character.startMove(point)
     }
