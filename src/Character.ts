@@ -2,9 +2,11 @@ import * as THREE from 'three'
 
 class Character {
   animations = {} as { [key: string]: THREE.AnimationClip }
+  camera = new THREE.PerspectiveCamera(50, 2, 0.1, 100)
   inMove = false
   target = null as THREE.Vector3 | null
   speed: number
+  container: THREE.Object3D
   mesh: THREE.Mesh
   mixer: THREE.AnimationMixer
   walk: THREE.AnimationAction
@@ -15,8 +17,12 @@ class Character {
     animationClip: THREE.AnimationClip
   ) {
     this.speed = speed
+    this.container = new THREE.Object3D()
     this.mesh = mesh
-    this.mesh.position.setY(-3)
+    this.container.add(this.camera)
+    this.container.add(this.mesh)
+    this.camera.position.set(0, -9, 7)
+    this.camera.lookAt(this.mesh.position)
     this.mixer = new THREE.AnimationMixer(this.mesh)
     this.walk = this.mixer.clipAction(animationClip)
     Character.character = this
@@ -33,8 +39,7 @@ class Character {
     this.target = point
     const vector2D = this.calculateVector()
     if (!vector2D) return
-    const angle = Math.atan2(vector2D.y, vector2D.x) + Math.PI / 2
-    this.mesh.rotation.z = angle
+    this.mesh.rotation.z = vector2D.angle() + Math.PI / 2
     this.inMove = true
     this.walk.play()
   }
@@ -42,41 +47,33 @@ class Character {
   endMove() {
     this.target = null
     this.inMove = false
-    if (this.walk) {
-      this.walk.stop()
-    }
+    this.walk.stop()
   }
 
   moveTo(deltaTime: number) {
     const vector2D = this.calculateVector()
     if (!vector2D || !this.target) return
-    const distance = Math.sqrt(
-      vector2D.x * vector2D.x + vector2D.y * vector2D.y
-    )
 
-    if (distance <= this.speed * deltaTime) {
-      this.mesh.position.set(this.target.x, this.target.y, this.mesh.position.z)
+    if (vector2D.length() <= this.speed * deltaTime) {
+      this.container.position.set(this.target.x, this.target.y, 0)
       this.endMove()
       return
     }
 
-    const framesCount = distance / this.speed / deltaTime
+    const velocity2D = vector2D
+      .normalize()
+      .multiplyScalar(this.speed * deltaTime)
+    const velocity3D = new THREE.Vector3(velocity2D.x, velocity2D.y, 0)
 
-    const velocity3D = new THREE.Vector3(
-      vector2D.x / framesCount,
-      vector2D.y / framesCount,
-      0
-    )
-
-    this.mesh.position.add(velocity3D)
+    this.container.position.add(velocity3D)
   }
 
   calculateVector() {
     if (!this.target) return
-    return {
-      x: this.target.x - this.mesh.position.x,
-      y: this.target.y - this.mesh.position.y,
-    }
+    return new THREE.Vector2(
+      this.target.x - this.container.position.x,
+      this.target.y - this.container.position.y
+    )
   }
 
   static character: Character

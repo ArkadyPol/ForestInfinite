@@ -1,6 +1,6 @@
 import * as THREE from 'three'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import Arrow from './Arrow'
+import CameraControls from './CameraControls'
 import Character from './Character'
 import { AnimationsType, ModelsType } from './utils/loadAssets'
 THREE.Object3D.DefaultUp.set(0, 0, 1)
@@ -9,11 +9,10 @@ class Game {
   canvas = document.querySelector('#c') as HTMLCanvasElement
   renderer = new THREE.WebGLRenderer({ canvas: this.canvas })
   scene = new THREE.Scene()
-  camera = new THREE.PerspectiveCamera(50, 2, 0.1, 100)
-  controls = new OrbitControls(this.camera, this.canvas)
   raycaster = new THREE.Raycaster()
   framesCount = 0
   then = 0
+  controls = new CameraControls(this.canvas)
   light!: THREE.DirectionalLight
   plane!: THREE.Mesh
 
@@ -29,12 +28,7 @@ class Game {
       models.character.getObjectByName('Character') as THREE.Mesh,
       animations.Walk
     )
-    this.scene.add(character.mesh)
-  }
-
-  start() {
-    this.camera.position.set(0, -10, 8)
-    this.controls.update()
+    this.scene.add(character.container)
     this.canvas.addEventListener('click', this.onClick.bind(this))
   }
 
@@ -42,7 +36,6 @@ class Game {
     const now = time * 0.001
     const deltaTime = now - this.then
     this.then = now
-    const arrows = Arrow.arrows
     for (let arrow of Arrow.arrows) {
       arrow.update(deltaTime)
     }
@@ -50,7 +43,7 @@ class Game {
     Character.character.update(deltaTime)
 
     this.resize()
-    this.renderer.render(this.scene, this.camera)
+    this.renderer.render(this.scene, Character.character.camera)
     this.framesCount++
   }
 
@@ -61,8 +54,9 @@ class Game {
     const needResize = canvas.width !== width || canvas.height !== height
     if (needResize) {
       this.renderer.setSize(width, height, false)
-      this.camera.aspect = canvas.clientWidth / canvas.clientHeight
-      this.camera.updateProjectionMatrix()
+      Character.character.camera.aspect =
+        canvas.clientWidth / canvas.clientHeight
+      Character.character.camera.updateProjectionMatrix()
     }
   }
 
@@ -87,7 +81,7 @@ class Game {
     const pointer = new THREE.Vector2()
     pointer.x = (e.clientX / this.canvas.width) * 2 - 1
     pointer.y = -(e.clientY / this.canvas.height) * 2 + 1
-    this.raycaster.setFromCamera(pointer, this.camera)
+    this.raycaster.setFromCamera(pointer, Character.character.camera)
     const intersects = this.raycaster.intersectObjects([this.plane])
     if (intersects.length > 0) {
       const point = intersects[0].point
