@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "license": "MIT",
   "private": true,
-  "homepage": "https://ArkadyPol.github.io/forestinfinite",
+  "homepage": "https://arkadypol.github.io/ForestInfinite/",
   "scripts": {
     "start": "webpack serve --mode=development",
     "build": "webpack --mode=production",
