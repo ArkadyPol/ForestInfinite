@@ -28,15 +28,15 @@ class Sector {
   }
 
   addTrees() {
-    const minNumber = (Sector.size * Sector.size) / 20
-    const treeNumber = MathUtils.randInt(minNumber, minNumber * 3)
+    const minNumber = Math.floor((Sector.size * Sector.size) / 50)
+    const treeNumber = MathUtils.randInt(minNumber, minNumber * 4)
 
     for (let i = 0; i < treeNumber; i++) {
       const tree = Sector.tree.clone()
       tree.rotateZ(MathUtils.randFloatSpread(Math.PI))
       tree.position.x = MathUtils.randFloatSpread(Sector.size)
       tree.position.y = MathUtils.randFloatSpread(Sector.size)
-      const scaleFactor = MathUtils.randFloat(0.8, 2.5)
+      const scaleFactor = MathUtils.randFloat(0.8, 6)
       tree.scale.multiplyScalar(scaleFactor)
       tree.position.z *= scaleFactor
       this.trees.push(tree)
@@ -45,14 +45,14 @@ class Sector {
   }
 
   addGrass() {
-    const minNumber = (Sector.size * Sector.size) / 10
-    const grassNumber = MathUtils.randInt(minNumber, minNumber * 4)
+    const minNumber = Math.floor((Sector.size * Sector.size) / 40)
+    const grassNumber = MathUtils.randInt(minNumber, minNumber * 3)
     for (let i = 0; i < grassNumber; i++) {
       const grass = Sector.grass.clone()
       grass.rotateZ(MathUtils.randFloatSpread(Math.PI))
       grass.position.x = MathUtils.randFloatSpread(Sector.size)
       grass.position.y = MathUtils.randFloatSpread(Sector.size)
-      const scaleFactor = MathUtils.randFloat(0.8, 1.2)
+      const scaleFactor = MathUtils.randFloat(0.8, 2)
       grass.scale.multiplyScalar(scaleFactor)
       grass.position.z *= scaleFactor
       this.grass.push(grass)
