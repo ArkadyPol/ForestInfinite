@@ -2,7 +2,7 @@ import * as THREE from 'three'
 
 class Character {
   animations = {} as { [key: string]: THREE.AnimationClip }
-  camera = new THREE.PerspectiveCamera(50, 2, 0.1, 100)
+  camera = new THREE.PerspectiveCamera(50, 2, 0.1, 200)
   inMove = false
   target = null as THREE.Vector3 | null
   speed: number

@@ -13,7 +13,7 @@ class Game {
   raycaster = new THREE.Raycaster()
   framesCount = 0
   then = 0
-  controls = new CameraControls(this.canvas)
+  controls: CameraControls
   light!: THREE.DirectionalLight
 
   constructor(models: ModelsType, animations: AnimationsType, sectorSize = 40) {
@@ -30,6 +30,7 @@ class Game {
       models.character.getObjectByName('Character') as THREE.Object3D,
       animations.Walk
     )
+    this.controls = new CameraControls(this.canvas)
     this.scene.add(character.container)
     this.canvas.addEventListener('click', this.onClick.bind(this))
   }
