@@ -9,19 +9,22 @@ class Character {
   container: THREE.Group
   mesh: THREE.Object3D
   mixer: THREE.AnimationMixer
+  cameraOptions: { radius: number; height: number }
   walk: THREE.AnimationAction
 
   constructor(
     speed: number,
     mesh: THREE.Object3D,
-    animationClip: THREE.AnimationClip
+    animationClip: THREE.AnimationClip,
+    cameraOptions = { radius: 9, height: 7 }
   ) {
     this.speed = speed
     this.container = new THREE.Group()
     this.mesh = mesh
     this.container.add(this.camera)
     this.container.add(this.mesh)
-    this.camera.position.set(0, -9, 7)
+    this.cameraOptions = cameraOptions
+    this.camera.position.set(0, -cameraOptions.radius, cameraOptions.height)
     this.camera.lookAt(this.mesh.position)
     this.mixer = new THREE.AnimationMixer(this.mesh)
     this.walk = this.mixer.clipAction(animationClip)

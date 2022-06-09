@@ -18,7 +18,7 @@ const stats = Stats()
 document.body.appendChild(stats.dom)
 
 manager.onLoad = () => {
-  const game = new Game(models, animations)
+  const game = new Game(models, animations, 50)
 
   function animate(time: number) {
     stats.begin()

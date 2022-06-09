@@ -36,9 +36,9 @@ class CameraControls {
     const diffX = e.clientX - this.eventX
 
     const newPos = new Vector3().setFromCylindricalCoords(
-      9,
+      Character.character.cameraOptions.radius,
       this.angle + diffX / 20,
-      7
+      Character.character.cameraOptions.height
     )
 
     const characterWorldPos = new Vector3()
