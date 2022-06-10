@@ -21,8 +21,7 @@ class Game {
     Sector.size = sectorSize
     Sector.tree = models.tree.getObjectByName('Tree') as THREE.Group
     Sector.grass = models.grass.getObjectByName('Grass') as THREE.Mesh
-    const sector = new Sector(0, 0, this.scene)
-    sector.sector.add(models.house)
+    new Sector(0, 0, this.scene, models.house)
     Arrow.meshSample = models.arrow.getObjectByName('Arrow') as THREE.Mesh
     Arrow.animationClip = animations.ArrowAction
     const character = new Character(
