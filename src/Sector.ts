@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import { MathUtils } from 'three'
+import { randomWithCustomDistribution } from './utils/random'
 
 class Sector {
   x: number
@@ -28,7 +29,7 @@ class Sector {
   }
 
   addTrees() {
-    const minNumber = Math.floor((Sector.size * Sector.size) / 50)
+    const minNumber = Math.floor((Sector.size * Sector.size) / 60)
     const treeNumber = MathUtils.randInt(minNumber, minNumber * 4)
 
     for (let i = 0; i < treeNumber; i++) {
@@ -36,7 +37,7 @@ class Sector {
       tree.rotateZ(MathUtils.randFloatSpread(Math.PI))
       tree.position.x = MathUtils.randFloatSpread(Sector.size)
       tree.position.y = MathUtils.randFloatSpread(Sector.size)
-      const scaleFactor = MathUtils.randFloat(0.8, 6)
+      const scaleFactor = randomWithCustomDistribution(1, 10, 3, 1.5, 0.5, 9)
       tree.scale.multiplyScalar(scaleFactor)
       tree.position.z *= scaleFactor
       this.trees.push(tree)
