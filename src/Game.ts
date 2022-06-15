@@ -2,13 +2,14 @@ import * as THREE from 'three'
 import Arrow from './Arrow'
 import CameraControls from './CameraControls'
 import Character from './Character'
+import GameEvent from './GameEvent'
 import Sector from './Sector'
 import { AnimationsType, ModelsType } from './utils/loadAssets'
 THREE.Object3D.DefaultUp.set(0, 0, 1)
 
 class Game {
   canvas = document.querySelector('#c') as HTMLCanvasElement
-  renderer = new THREE.WebGLRenderer({ canvas: this.canvas })
+  renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true })
   scene = new THREE.Scene()
   raycaster = new THREE.Raycaster()
   framesCount = 0
@@ -18,10 +19,18 @@ class Game {
 
   constructor(models: ModelsType, animations: AnimationsType, sectorSize = 40) {
     this.addLight()
+    GameEvent.event = new GameEvent()
     Sector.size = sectorSize
     Sector.tree = models.tree.getObjectByName('Tree') as THREE.Group
     Sector.grass = models.grass.getObjectByName('Grass') as THREE.Mesh
-    new Sector(0, 0, this.scene, models.house)
+    Sector.parent = this.scene
+    Sector.current = new Sector(0, 0, this.scene, models.house)
+    GameEvent.event.addEventListener('crossBorder', e => {
+      Sector.setActive(e.x, e.y)
+    })
+    GameEvent.event.addEventListener('sectorLeave', e => {
+      Sector.onSectorLeave(e.x, e.y)
+    })
     Arrow.meshSample = models.arrow.getObjectByName('Arrow') as THREE.Mesh
     Arrow.animationClip = animations.ArrowAction
     const character = new Character(
@@ -79,33 +88,7 @@ class Game {
     this.raycaster.setFromCamera(pointer, Character.character.camera)
     const intersects = this.raycaster.intersectObjects(Sector.planes)
     if (intersects.length > 0) {
-      const { point, object } = intersects[0]
-      const local = new THREE.Vector3().copy(point)
-      object.worldToLocal(local)
-      const sectorPos = new THREE.Vector3()
-        .copy(object.parent!.position)
-        .divideScalar(Sector.size)
-
-      const border = Sector.size * 0.4
-      const xDiff = Math.abs(local.x) - border
-      const yDiff = Math.abs(local.y) - border
-
-      if (xDiff >= 0) {
-        Sector.create(sectorPos.x + Math.sign(local.x), sectorPos.y, this.scene)
-      }
-
-      if (yDiff >= 0) {
-        Sector.create(sectorPos.x, sectorPos.y + Math.sign(local.y), this.scene)
-      }
-
-      if (xDiff >= 0 && yDiff >= 0) {
-        Sector.create(
-          sectorPos.x + Math.sign(local.x),
-          sectorPos.y + Math.sign(local.y),
-          this.scene
-        )
-      }
-
+      const { point } = intersects[0]
       this.createArrow(point)
       Character.character.startMove(point)
     }

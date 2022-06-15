@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import Sector from './Sector'
 
 class Character {
   animations = {} as { [key: string]: THREE.AnimationClip }
@@ -35,6 +36,7 @@ class Character {
     this.mixer.update(deltaTime)
     if (this.inMove) {
       this.moveTo(deltaTime)
+      Sector.checkBorder(this.container.position)
     }
   }
 

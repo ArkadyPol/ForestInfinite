@@ -1,5 +1,6 @@
 import * as THREE from 'three'
-import { MathUtils } from 'three'
+import { MathUtils, Scene, Vector3 } from 'three'
+import GameEvent from './GameEvent'
 import { createChunks, randomWithCustomDistribution } from './utils/random'
 
 class Sector {
@@ -11,6 +12,7 @@ class Sector {
   grass = [] as THREE.Mesh[]
   house?: THREE.Group
   boundingBoxes = [] as THREE.Box3[]
+  active = true
 
   constructor(x: number, y: number, scene: THREE.Scene, house?: THREE.Group) {
     this.x = x
@@ -88,8 +90,16 @@ class Sector {
 
   static grass: THREE.Mesh
 
+  static current: Sector
+
+  static parent: Scene
+
   static get planes() {
     return this.sectors.map(s => s.plane)
+  }
+
+  static get active() {
+    return this.sectors.filter(s => s.active)
   }
 
   static isExist(x: number, y: number) {
@@ -97,9 +107,96 @@ class Sector {
     return index !== -1
   }
 
+  static isActive(x: number, y: number) {
+    const sector = this.sectors.find(s => s.x === x && s.y === y)
+    if (!sector) return false
+    return sector.active
+  }
+
   static create(x: number, y: number, scene: THREE.Scene) {
     if (this.isExist(x, y)) return
     return new this(x, y, scene)
+  }
+
+  static setActive(x: number, y: number) {
+    const sector = this.sectors.find(s => s.x === x && s.y === y)
+    if (!sector) {
+      this.create(x, y, this.parent)
+      return
+    }
+    sector.active = true
+    sector.sector.visible = true
+  }
+
+  static setCurrent(x: number, y: number) {
+    const sector = this.sectors.find(s => s.x === x && s.y === y)
+    if (!sector) return
+    this.current = sector
+  }
+
+  static checkBorder(position: Vector3) {
+    const local = new THREE.Vector3().copy(position)
+    this.current.plane.worldToLocal(local)
+    const border = this.size * 0.4
+    const xDiff = Math.abs(local.x) - border
+    const yDiff = Math.abs(local.y) - border
+    const event = {
+      type: 'crossBorder',
+      currentTarget: this.current,
+      x: 0,
+      y: 0,
+    }
+    if (xDiff >= 0) {
+      event.x = this.current.x + Math.sign(local.x)
+      event.y = this.current.y
+      if (!this.isActive(event.x, event.y)) {
+        GameEvent.event.dispatchEvent(event)
+      }
+    }
+
+    if (yDiff >= 0) {
+      event.x = this.current.x
+      event.y = this.current.y + Math.sign(local.y)
+      if (!this.isActive(event.x, event.y)) {
+        GameEvent.event.dispatchEvent(event)
+      }
+    }
+
+    if (xDiff >= 0 && yDiff >= 0) {
+      event.x = this.current.x + Math.sign(local.x)
+      event.y = this.current.y + Math.sign(local.y)
+      if (!this.isActive(event.x, event.y)) {
+        GameEvent.event.dispatchEvent(event)
+      }
+    }
+
+    event.type = 'sectorLeave'
+
+    if (xDiff > this.size * 0.1 && yDiff > this.size * 0.1) {
+      event.x = this.current.x + Math.sign(local.x)
+      event.y = this.current.y + Math.sign(local.y)
+      GameEvent.event.dispatchEvent(event)
+    } else if (xDiff > this.size * 0.1) {
+      event.x = this.current.x + Math.sign(local.x)
+      event.y = this.current.y
+      GameEvent.event.dispatchEvent(event)
+    } else if (yDiff > this.size * 0.1) {
+      event.x = this.current.x
+      event.y = this.current.y + Math.sign(local.y)
+      GameEvent.event.dispatchEvent(event)
+    }
+  }
+
+  static onSectorLeave(x: number, y: number) {
+    this.setCurrent(x, y)
+    for (let sector of this.active) {
+      const xDiff = Math.abs(sector.x - this.current.x)
+      const yDiff = Math.abs(sector.y - this.current.y)
+      if (xDiff > 1 || yDiff > 1) {
+        sector.active = false
+        sector.sector.visible = false
+      }
+    }
   }
 }
 
