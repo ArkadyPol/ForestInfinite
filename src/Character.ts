@@ -22,6 +22,8 @@ class Character {
     this.speed = speed
     this.container = new THREE.Group()
     this.mesh = mesh
+    this.mesh.position.setX(0)
+    this.mesh.position.setY(0)
     this.container.add(this.camera)
     this.container.add(this.mesh)
     this.cameraOptions = cameraOptions
@@ -71,6 +73,14 @@ class Character {
     const velocity3D = new THREE.Vector3(velocity2D.x, velocity2D.y, 0)
 
     this.container.position.add(velocity3D)
+  }
+
+  moveForward() {
+    const clone = this.mesh.clone().translateY(-this.speed)
+    const target = new THREE.Vector3()
+      .copy(this.container.position)
+      .add(clone.position)
+    this.startMove(target)
   }
 
   calculateVector() {

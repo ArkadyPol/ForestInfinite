@@ -41,6 +41,7 @@ class Game {
     this.controls = new CameraControls(this.canvas)
     this.scene.add(character.container)
     this.canvas.addEventListener('click', this.onClick.bind(this))
+    window.addEventListener('keydown', this.onKeyDown.bind(this))
   }
 
   render(time: number) {
@@ -91,6 +92,18 @@ class Game {
       const { point } = intersects[0]
       this.createArrow(point)
       Character.character.startMove(point)
+    }
+  }
+
+  onKeyDown(e: KeyboardEvent) {
+    if (e.code === 'KeyW' || e.code === 'ArrowUp') {
+      Character.character.moveForward()
+    }
+    if (e.code === 'KeyD' || e.code === 'ArrowRight') {
+      Character.character.mesh.rotateZ(-Math.PI / 30)
+    }
+    if (e.code === 'KeyA' || e.code === 'ArrowLeft') {
+      Character.character.mesh.rotateZ(+Math.PI / 30)
     }
   }
 
