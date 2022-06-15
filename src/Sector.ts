@@ -95,7 +95,7 @@ class Sector {
   static parent: Scene
 
   static get planes() {
-    return this.sectors.map(s => s.plane)
+    return this.active.map(s => s.plane)
   }
 
   static get active() {
@@ -125,7 +125,7 @@ class Sector {
       return
     }
     sector.active = true
-    sector.sector.visible = true
+    this.parent.add(sector.sector)
   }
 
   static setCurrent(x: number, y: number) {
@@ -194,7 +194,7 @@ class Sector {
       const yDiff = Math.abs(sector.y - this.current.y)
       if (xDiff > 1 || yDiff > 1) {
         sector.active = false
-        sector.sector.visible = false
+        this.parent.remove(sector.sector)
       }
     }
   }
